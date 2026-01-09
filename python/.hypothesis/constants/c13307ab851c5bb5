@@ -1,0 +1,4 @@
+# file: /home/runner/work/vindinium-python/vindinium-python/python/vindinium/system/generator.py
+# hypothesis_version: 6.150.0
+
+[0.05, 0.1, 0.3, 0.8, 300, '##', '$-', '[]', 'center', 'corners', 'cross', 'test-game', 'test-minimal']

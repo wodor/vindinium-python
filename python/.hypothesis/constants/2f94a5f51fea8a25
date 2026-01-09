@@ -1,0 +1,4 @@
+# file: /home/runner/work/vindinium-python/vindinium-python/python/vindinium/system/__init__.py
+# hypothesis_version: 6.150.0
+
+['Generator', 'MapParser']

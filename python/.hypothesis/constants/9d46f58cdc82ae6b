@@ -1,0 +1,4 @@
+# file: /home/runner/work/vindinium-python/vindinium-python/python/vindinium/models/status.py
+# hypothesis_version: 6.150.0
+
+['AllCrashed', 'Created', 'Started', 'TurnMax']
