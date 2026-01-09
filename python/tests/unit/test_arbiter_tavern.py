@@ -1,34 +1,11 @@
 """Property-based tests for Arbiter tavern mechanics."""
 
-import pytest
 from hypothesis import given, strategies as st, assume, settings, HealthCheck
-from vindinium.models import Pos, Dir, Tile, TileType, Hero, Board, Game, Status
+from vindinium.models import Pos, Dir, Tile, Hero, Board, Game, Status
 from vindinium.game_logic import Arbiter
 
 
 # Test data generators
-@st.composite
-def hero_with_varied_resources(draw, size=6):
-    """Generate a hero with varied health (1-100) and gold (0-10)."""
-    life = draw(st.integers(min_value=1, max_value=100))
-    gold = draw(st.integers(min_value=0, max_value=10))
-    x = draw(st.integers(min_value=0, max_value=size-1))
-    y = draw(st.integers(min_value=0, max_value=size-1))
-    
-    hero = Hero.create(
-        id=1,
-        name="TestBot",
-        user_id="user1",
-        elo=1200,
-        pos=Pos(x, y),
-        token="token1"
-    )
-    # Set custom life and gold
-    hero = hero.with_life(life - hero.life).with_gold(gold)
-    
-    return hero
-
-
 @st.composite
 def game_with_tavern(draw, size=6):
     """Generate a game state with a tavern at a specific position."""
@@ -49,6 +26,8 @@ def game_with_tavern(draw, size=6):
     assume(0 <= tavern_pos.y < size)
     
     # Place tavern at target position
+    # Note: Board uses row-major indexing: pos.x * size + pos.y
+    # where x is the row and y is the column
     tavern_index = tavern_pos.x * size + tavern_pos.y
     tiles[tavern_index] = Tile.tavern()
     
@@ -185,12 +164,6 @@ class TestTavernInvariants:
         
         # Gold should remain unchanged
         assert updated_hero.gold == original_gold
-        
-        # Life should remain unchanged (before end-of-turn effects)
-        # Note: Arbiter.process_move includes finalize_turn which applies life drain
-        # So we need to account for that
-        # Actually, looking at the arbiter, it applies life drain at finalize_turn
-        # Let's check if the hero state is identical except for turn effects
         
         # Gold must not drop below 0
         assert updated_hero.gold >= 0
