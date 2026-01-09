@@ -1,0 +1,162 @@
+openapi: 3.0.3
+info:
+  title: Vindinium API
+  version: 1.0.0
+  description: Python implementation of Vindinium Game Server
+paths:
+  /api/training:
+    post:
+      summary: Start a training game
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                turns:
+                  type: integer
+                map:
+                  type: string
+      responses:
+        '200':
+          description: Game started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameState'
+
+  /api/arena:
+    post:
+      summary: Join arena queue
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+      responses:
+        '200':
+          description: Game matched/started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameState'
+
+  /api/{gameId}/{token}/{dir}:
+    post:
+      summary: Make a move
+      parameters:
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: dir
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [North, South, East, West, Stay]
+      responses:
+        '200':
+          description: Move processed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameState'
+
+  /api/game/{gameId}:
+    get:
+      summary: Get game state
+      parameters:
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Current game state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameState'
+
+components:
+  schemas:
+    GameState:
+      type: object
+      properties:
+        game:
+          type: object
+          properties:
+            id: 
+              type: string
+            turn:
+              type: integer
+            maxTurns:
+              type: integer
+            finished:
+              type: boolean
+            board:
+              type: object
+              properties:
+                size:
+                  type: integer
+                tiles:
+                  type: string
+            heroes:
+              type: array
+              items:
+                $ref: '#/components/schemas/Hero'
+        hero:
+          $ref: '#/components/schemas/Hero'
+        token:
+          type: string
+        viewUrl:
+          type: string
+        playUrl:
+          type: string
+
+    Hero:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        userId:
+          type: string
+        elo:
+          type: integer
+        pos:
+          type: object
+          properties:
+            x:
+              type: integer
+            y:
+              type: integer
+        life:
+          type: integer
+        gold:
+          type: integer
+        mineCount:
+          type: integer
+        spawnPos:
+          type: object
+          properties:
+            x:
+              type: integer
+            y:
+              type: integer
+        crashed:
+          type: boolean
