@@ -6,6 +6,19 @@
 
 *And looking for a tavern where to drink their gold*
 
+---
+
+## 🐍 Python Rewrite (2026)
+
+This repository is being rewritten in **Python 3.11+ with FastAPI**. The new implementation maintains full compatibility with the original game mechanics while leveraging modern async capabilities.
+
+- **Python Implementation**: See `python/` directory
+- **Documentation**: See `specs/001-vindinium-python-rewrite/`
+- **Contributing**: See `CONTRIBUTING.md` (especially for Copilot agents)
+- **Quick Start**: See `python/QUICKSTART.md`
+
+---
+
 ### Warning
 
 The vindinium dot org website has been discontinued, and the domain now belongs to Internet parasites.
