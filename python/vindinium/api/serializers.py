@@ -4,7 +4,22 @@ from typing import Any
 from vindinium.models import Game, Hero, Board, Tile, TileType
 
 
-def serialize_hero(hero: Hero) -> dict[str, Any]:
+def get_hero_mine_count(game: Game, hero: Hero) -> int:
+    """Count the number of mines owned by a hero."""
+    count = 0
+    for tile in game.board.tiles:
+        if tile.tile_type == TileType.MINE and tile.owner == hero.id:
+            count += 1
+    return count
+
+
+def get_hero_spawn_pos(game: Game, hero: Hero) -> dict[str, int]:
+    """Get the spawn position for a hero based on their ID."""
+    spawn = game.spawn_pos_of(hero)
+    return {"x": spawn.x, "y": spawn.y}
+
+
+def serialize_hero(hero: Hero, game: Game) -> dict[str, Any]:
     """
     Serialize a hero to match client expectations.
     
@@ -28,8 +43,8 @@ def serialize_hero(hero: Hero) -> dict[str, Any]:
         "pos": {"x": hero.pos.x, "y": hero.pos.y},
         "life": hero.life,
         "gold": hero.gold,
-        "mineCount": hero.mine_count,
-        "spawnPos": {"x": hero.spawn_pos.x, "y": hero.spawn_pos.y},
+        "mineCount": get_hero_mine_count(game, hero),
+        "spawnPos": get_hero_spawn_pos(game, hero),
         "crashed": hero.crashed,
     }
 
@@ -48,13 +63,13 @@ def serialize_board_tiles(board: Board) -> str:
     """
     tiles_str = ""
     for tile in board.tiles:
-        if tile.type == TileType.AIR:
+        if tile.tile_type == TileType.AIR:
             tiles_str += "  "
-        elif tile.type == TileType.WALL:
+        elif tile.tile_type == TileType.WALL:
             tiles_str += "##"
-        elif tile.type == TileType.TAVERN:
+        elif tile.tile_type == TileType.TAVERN:
             tiles_str += "[]"
-        elif tile.type == TileType.MINE:
+        elif tile.tile_type == TileType.MINE:
             if tile.owner is None:
                 tiles_str += "$-"
             else:
@@ -96,7 +111,7 @@ def serialize_game(game: Game) -> dict[str, Any]:
         "id": game.id,
         "turn": game.turn,
         "maxTurns": game.max_turns,
-        "heroes": [serialize_hero(h) for h in game.heroes],
+        "heroes": [serialize_hero(h, game) for h in game.heroes],
         "board": serialize_board(game.board),
         "finished": game.finished,
     }
@@ -109,7 +124,7 @@ def serialize_game_for_hero(game: Game, hero: Hero) -> dict[str, Any]:
     Used for API responses that include the acting hero's context.
     """
     game_data = serialize_game(game)
-    hero_data = serialize_hero(hero)
+    hero_data = serialize_hero(hero, game)
     
     return {
         "game": game_data,

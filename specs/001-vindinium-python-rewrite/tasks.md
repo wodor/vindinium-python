@@ -104,16 +104,16 @@ description: "Task list for Vindinium Python Rewrite"
 
 ### Implementation for US4
 
-- [ ] T037 [US4] Add `sse-starlette==1.8.2` to `python/requirements.txt`
-- [ ] T038 [P] [US4] Create `python/vindinium/api/__init__.py` API module structure
-- [ ] T039 [P] [US4] Implement SSE game state generator in `python/vindinium/api/sse_utils.py`
-- [ ] T040 [US4] Implement `GET /events/{game_id}` SSE endpoint in `python/vindinium/api/game_routes.py`
-- [ ] T041 [P] [US4] Mount static file serving for `/assets` in `python/main.py`
-- [ ] T042 [US4] Implement `GET /{game_id}` HTML game viewer in `python/vindinium/api/game_routes.py`
-- [ ] T043 [P] [US4] Create game state serializer matching client JSON schema in `python/vindinium/api/serializers.py`
-- [ ] T044 [US4] Implement `GET /now-playing` SSE endpoint for active games in `python/vindinium/api/game_routes.py`
-- [ ] T045 [US4] Implement `GET /tv` TV mode viewer page in `python/vindinium/api/game_routes.py`
-- [ ] T046 [US4] Update training/move endpoints to trigger SSE events in `python/vindinium/api/routes.py`
+- [X] T037 [US4] Add `sse-starlette==1.8.2` to `python/requirements.txt`
+- [X] T038 [P] [US4] Create `python/vindinium/api/__init__.py` API module structure
+- [X] T039 [P] [US4] Implement SSE game state generator in `python/vindinium/api/sse_utils.py`
+- [X] T040 [US4] Implement `GET /events/{game_id}` SSE endpoint in `python/vindinium/api/game_routes.py`
+- [X] T041 [P] [US4] Mount static file serving for `/assets` in `python/main.py`
+- [X] T042 [US4] Implement `GET /{game_id}` HTML game viewer in `python/vindinium/api/game_routes.py`
+- [X] T043 [P] [US4] Create game state serializer matching client JSON schema in `python/vindinium/api/serializers.py`
+- [X] T044 [US4] Implement `GET /now-playing` SSE endpoint for active games in `python/vindinium/api/game_routes.py`
+- [X] T045 [US4] Implement `GET /tv` TV mode viewer page in `python/vindinium/api/game_routes.py`
+- [X] T046 [US4] Update training/move endpoints to trigger SSE events in `python/vindinium/api/routes.py`
 
 ### Client Validation Extension
 
