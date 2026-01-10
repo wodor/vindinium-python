@@ -1,0 +1,52 @@
+name: Copilot Setup Steps
+
+on:
+  workflow_dispatch:
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install Python dependencies
+        run: |
+          cd python
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Verify Docker availability
+        run: |
+          docker --version
+          docker compose version
+      
+      - name: Start MongoDB container
+        run: |
+          cd python
+          docker compose -f docker-compose.test.yml up -d
+          # Wait for MongoDB to be ready
+          timeout 30 bash -c 'until docker exec vindinium-test-mongodb mongosh --eval "db.adminCommand(\"ping\")" > /dev/null 2>&1; do sleep 1; done'
+          echo "MongoDB is ready"
+      
+      - name: Verify MongoDB connection
+        run: |
+          docker exec vindinium-test-mongodb mongosh --eval "db.version()"
+      
+      - name: Run E2E tests
+        run: |
+          cd python
+          python run_e2e_tests.py -v
+        timeout-minutes: 5
+      
+      - name: Cleanup MongoDB container
+        if: always()
+        run: |
+          cd python
+          docker compose -f docker-compose.test.yml down -v || true

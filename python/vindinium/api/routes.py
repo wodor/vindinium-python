@@ -64,7 +64,7 @@ async def create_training_game(
         board = MapParser.parse_default_map(map)
     else:
         # Generate random map
-        board = Generator.create_random_board(size=20)
+        board = Generator.create_random_map(size=20)
     
     # Create game state
     game = Generator.create_initial_game_state(

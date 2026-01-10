@@ -84,8 +84,59 @@ See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for detailed roadmap.
 
 ## Testing
 
+### Unit Tests
+
+Run unit tests for individual components:
+
 ```bash
-pytest tests/
+pytest tests/unit/ -v
+```
+
+### Integration Tests
+
+Run integration tests:
+
+```bash
+pytest tests/integration/ -v
+```
+
+### End-to-End Tests
+
+Run full end-to-end tests with MongoDB container and live server:
+
+```bash
+# Simple way - runs everything automatically
+./run_e2e_tests.sh
+
+# Or using Python directly
+python run_e2e_tests.py
+
+# Run specific E2E tests
+./run_e2e_tests.sh -k test_health
+
+# Run with verbose output
+./run_e2e_tests.sh -vv
+```
+
+The E2E test suite automatically:
+- ✅ Starts MongoDB container using Docker
+- ✅ Starts the game server
+- ✅ Runs comprehensive API tests
+- ✅ Cleans up all resources (even on Ctrl+C)
+
+**Prerequisites for E2E tests:**
+- Docker or Podman installed
+- Python 3.10+
+- All dependencies installed (`pip install -r requirements.txt`)
+
+See [tests/e2e/README.md](tests/e2e/README.md) for detailed E2E testing documentation.
+
+### All Tests
+
+Run all tests:
+
+```bash
+pytest tests/ -v
 ```
 
 ## Original Scala Version
