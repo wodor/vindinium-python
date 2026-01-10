@@ -78,13 +78,13 @@ description: "Task list for Vindinium Python Rewrite"
 
 ### Implementation for US3
 
-- [ ] T026 [P] [US3] Setup MongoDB connection in `python/vindinium/db/mongodb.py`
-- [ ] T027 [P] [US3] Implement GameRepository in `python/vindinium/db/repositories.py`
-- [ ] T028 [US3] Create FastAPI app entry point in `python/main.py`
-- [ ] T029 [US3] Implement `POST /api/training` endpoint in `python/vindinium/api/routes.py`
-- [ ] T030 [US3] Implement `POST /api/{gameId}/{token}/{dir}` endpoint in `python/vindinium/api/routes.py`
-- [ ] T031 [US3] Implement `GET /api/game/{gameId}` endpoint in `python/vindinium/api/routes.py`
-- [ ] T032 [US3] Add Error Handling & Logging middleware in `python/vindinium/api/middleware.py`
+- [x] T026 [P] [US3] Setup MongoDB connection in `python/vindinium/db/mongodb.py`
+- [x] T027 [P] [US3] Implement GameRepository in `python/vindinium/db/repositories.py`
+- [x] T028 [US3] Create FastAPI app entry point in `python/main.py`
+- [x] T029 [US3] Implement `POST /api/training` endpoint in `python/vindinium/api/routes.py`
+- [x] T030 [US3] Implement `POST /api/{gameId}/{token}/{dir}` endpoint in `python/vindinium/api/routes.py`
+- [x] T031 [US3] Implement `GET /api/game/{gameId}` endpoint in `python/vindinium/api/routes.py`
+- [x] T032 [US3] Add Error Handling & Logging middleware in `python/vindinium/api/middleware.py`
 
 ## Phase 5: Polish & Integration
 
