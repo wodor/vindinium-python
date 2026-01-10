@@ -93,8 +93,19 @@ pytest python/tests/unit/test_models.py -v
 # Run with Hypothesis verbose output
 pytest python/tests/unit/test_arbiter_properties.py -v --hypothesis-show-statistics
 
+# Run all unit tests
+pytest python/tests/unit/ -v
+
 # Run all tests
 pytest python/tests/ -v
+
+# Run E2E tests (requires Docker)
+cd python
+./run_e2e_tests.sh
+
+# Run specific E2E test
+cd python
+./run_e2e_tests.sh -k test_health
 
 # Lint code
 ruff check python/
@@ -103,10 +114,14 @@ ruff check python/
 ### Validation Before PR
 
 ```bash
-# Must pass all three:
+# Must pass all:
 pytest python/tests/ -v
 ruff check python/
 python -m mypy python/vindinium --strict
+
+# Also run E2E tests to validate full stack:
+cd python
+./run_e2e_tests.sh
 ```
 
 ## Key Requirements Reference
@@ -313,6 +328,63 @@ export MONGODB_URI="mongodb://localhost:27017"
 export MONGODB_DB="vindinium_dev"
 ```
 
+### E2E Testing Environment
+
+**End-to-End tests** validate the complete application stack with live MongoDB and game server.
+
+#### Quick Start
+```bash
+cd python
+./run_e2e_tests.sh
+```
+
+#### What E2E Tests Do
+- ✅ Automatically start MongoDB container (Docker Compose)
+- ✅ Automatically start game server
+- ✅ Run comprehensive API tests (11 tests)
+- ✅ Automatically cleanup all resources
+- ✅ Complete in ~4 seconds
+
+#### Prerequisites
+- Docker or Podman installed and running
+- Python 3.10+ with pytest, httpx, motor
+- Ports 27017 (MongoDB) and 9000 (server) available
+
+#### E2E Test Commands
+```bash
+# Run all E2E tests
+cd python
+./run_e2e_tests.sh
+
+# Run specific test
+./run_e2e_tests.sh -k test_health
+
+# Run with verbose output
+./run_e2e_tests.sh -vv
+
+# Stop on first failure
+./run_e2e_tests.sh -x
+
+# Debug mode
+./run_e2e_tests.sh --pdb
+```
+
+#### E2E Test Coverage
+- Server health endpoints
+- Game creation (default/custom parameters, validation)
+- Hero movement (moves, authentication, error handling)
+- Game state retrieval
+
+#### Cleanup and Isolation
+- Each test gets a clean database (function-scoped fixture)
+- Container cleanup happens automatically, even on Ctrl+C
+- No manual cleanup needed
+
+#### Documentation
+- **Quick Reference**: `python/E2E_QUICKSTART.md`
+- **Detailed Guide**: `python/tests/e2e/README.md`
+- **Implementation Summary**: `specs/002-copilot-e2e-workflow/IMPLEMENTATION_SUMMARY.md`
+
 ## Troubleshooting
 
 ### Common Issues
@@ -330,7 +402,16 @@ export MONGODB_DB="vindinium_dev"
 **Solution**: Make sure you're in the `/python` directory when running commands
 
 **Issue**: MongoDB connection errors in tests
-**Solution**: Integration tests may require a running MongoDB instance. Unit tests should not.
+**Solution**: Integration tests may require a running MongoDB instance. Unit tests should not. For E2E tests, use `./run_e2e_tests.sh` which manages MongoDB automatically.
+
+**Issue**: E2E tests fail to start MongoDB container
+**Solution**: 
+- Ensure Docker is running: `docker ps`
+- Check port 27017 is not in use: `lsof -i :27017`
+- Clean up existing containers: `cd python && docker compose -f docker-compose.test.yml down -v`
+
+**Issue**: E2E test cleanup doesn't work
+**Solution**: The fixtures handle cleanup automatically. If containers remain, manually run: `cd python && docker compose -f docker-compose.test.yml down -v`
 
 ### Getting Help
 
@@ -361,6 +442,7 @@ When working on tasks, **always work in the `python/` directory** unless the iss
 - ✅ Pure functions in Arbiter
 - ✅ Type hints everywhere
 - ✅ Verify invariants with Hypothesis
+- ✅ Run E2E tests to validate full stack (`./run_e2e_tests.sh`)
 - ✅ Never commit secrets or credentials
 - ✅ Work in `python/` directory for all new code
 - ❌ No mutation of game state
