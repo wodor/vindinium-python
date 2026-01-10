@@ -82,6 +82,14 @@ dir: North, South, East, West, or Stay
 
 See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for detailed roadmap.
 
+## Manual Testing
+
+For manual testing and debugging of the client integration, see [MANUAL_TESTING.md](MANUAL_TESTING.md). This guide covers:
+- Running the game server with proper process management
+- Building and serving the JavaScript client
+- Debugging common issues (port conflicts, MongoDB readiness, etc.)
+- Best practices for manual testing vs CI/automated testing
+
 ## Testing
 
 ### Unit Tests

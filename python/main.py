@@ -3,11 +3,14 @@
 import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
+import os
 
 from vindinium.config import settings
 from vindinium.db.mongodb import MongoDBClient
 from vindinium.api.routes import router as api_router
+from vindinium.api.game_routes import router as game_router
 from vindinium.api.middleware import ErrorHandlingMiddleware, RequestLoggingMiddleware
 
 
@@ -42,8 +45,15 @@ app = FastAPI(
 app.add_middleware(ErrorHandlingMiddleware)
 app.add_middleware(RequestLoggingMiddleware)
 
+# Mount static files for client assets
+# Check if public directory exists (from repository root)
+public_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "public")
+if os.path.exists(public_dir):
+    app.mount("/assets", StaticFiles(directory=public_dir), name="assets")
+
 # Include API routes
 app.include_router(api_router)
+app.include_router(game_router)
 
 
 @app.get("/", response_class=HTMLResponse)
