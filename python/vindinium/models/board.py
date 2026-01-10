@@ -145,3 +145,15 @@ class Board:
 
     def __str__(self) -> str:
         return self.render()
+    
+    def to_dict(self) -> dict:
+        """Convert board to dictionary for serialization."""
+        return {
+            "tiles": [tile.to_dict() for tile in self.tiles],
+        }
+    
+    @classmethod
+    def from_dict(cls, data: dict) -> "Board":
+        """Create board from dictionary."""
+        from .tile import Tile
+        return cls([Tile.from_dict(t) for t in data["tiles"]])

@@ -3,18 +3,47 @@
 import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
+from contextlib import asynccontextmanager
 
 from vindinium.config import settings
+from vindinium.db.mongodb import MongoDBClient
+from vindinium.api.routes import router as api_router
+from vindinium.api.middleware import ErrorHandlingMiddleware, RequestLoggingMiddleware
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage application lifespan (startup and shutdown)."""
+    # Startup: Connect to MongoDB
+    await MongoDBClient.connect()
+    try:
+        # Create indexes
+        from vindinium.db.repositories import GameRepository
+        db = MongoDBClient.get_database()
+        repo = GameRepository(db)
+        await repo.create_indexes()
+    except Exception as e:
+        print(f"Warning: Could not create indexes: {e}")
+    
+    yield
+    
+    # Shutdown: Disconnect from MongoDB
+    await MongoDBClient.disconnect()
+
 
 app = FastAPI(
     title="Vindinium",
     description="AI Programming Challenge Game Server - Python Implementation",
     version="2.0.0",
+    lifespan=lifespan,
 )
 
-# TODO: Add API routes when implemented
-# from vindinium.api import routes
-# app.include_router(routes.router)
+# Add middleware
+app.add_middleware(ErrorHandlingMiddleware)
+app.add_middleware(RequestLoggingMiddleware)
+
+# Include API routes
+app.include_router(api_router)
 
 
 @app.get("/", response_class=HTMLResponse)

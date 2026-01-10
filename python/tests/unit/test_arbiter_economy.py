@@ -316,7 +316,10 @@ class TestEconomyInvariants:
             assert updated_hero.gold == expected_gold
 
     @given(game_data=game_with_mine())
-    @settings(suppress_health_check=[HealthCheck.large_base_example], max_examples=50)
+    @settings(
+        suppress_health_check=[HealthCheck.large_base_example, HealthCheck.filter_too_much],
+        max_examples=50
+    )
     def test_property_mine_capture_with_low_health(self, game_data):
         """
         Property: Mine capture with low health
@@ -448,15 +451,11 @@ class TestEconomyEdgeCases:
         updated_hero = result.get_hero(1)
         
         assert updated_hero is not None
-        assert updated_hero.pos == Pos(1, 1)  # Moved to mine
-        # 21 - 20 (mine) = 1, then 1 - 1 (drain) = 0 -> hero dies, respawns at Pos(0,0) with 100 - 1 = 99
-        assert updated_hero.life == 1  # Actually stays at 1 because finalize_turn kills it
-        # Actually let me verify: mine capture happens, then finalize_turn
-        # After looking at arbiter flow: movement -> combat -> respawn -> finalize_turn
-        # So: 21 - 20 = 1, then finalize_turn: 1 - 1 = 0, then respawn doesn't happen because we already passed that step
-        # Actually, checking the code again: finalize_turn is called AFTER movement, so hero would have 1 HP after mine, then -1, so 0, but needs_respawn checks in handle_respawns
-        # Let me test to see what actually happens
-        assert updated_hero.gold == 1  # Got income from the mine captured
+        # 21 - 20 (mine) = 1, then 1 - 1 (drain) = 0 -> respawns at spawn
+        assert updated_hero.pos == Pos(0, 0)  # Respawned at spawn
+        assert updated_hero.life == 100  # Respawned with full health
+        # Got income from the mine captured
+        assert updated_hero.gold == 1
     
     def test_mine_income_no_mines(self):
         """Test income when hero owns no mines."""

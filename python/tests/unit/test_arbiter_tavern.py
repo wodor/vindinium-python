@@ -130,7 +130,10 @@ class TestTavernInvariants:
         assert updated_hero.life <= 100
 
     @given(game_data=game_with_tavern())
-    @settings(suppress_health_check=[HealthCheck.large_base_example], max_examples=50)
+    @settings(
+        suppress_health_check=[HealthCheck.large_base_example, HealthCheck.filter_too_much],
+        max_examples=50
+    )
     def test_property_tavern_without_sufficient_gold(self, game_data):
         """
         Property: Tavern without sufficient gold (<2)
@@ -146,6 +149,9 @@ class TestTavernInvariants:
         # Only test heroes without sufficient gold
         assume(not hero.can_afford_beer())
         assert hero.gold < 2
+        
+        # Exclude heroes with only 1 life (they will die from life drain)
+        assume(hero.life > 1)
         
         # Store original state
         original_life = hero.life
@@ -221,7 +227,10 @@ class TestTavernInvariants:
         assert updated_hero.gold >= 0
 
     @given(game_data=game_with_tavern())
-    @settings(suppress_health_check=[HealthCheck.large_base_example], max_examples=50)
+    @settings(
+        suppress_health_check=[HealthCheck.large_base_example, HealthCheck.filter_too_much],
+        max_examples=50
+    )
     def test_property_insufficient_gold_state_preservation(self, game_data):
         """
         Property: State preservation when insufficient gold
@@ -234,6 +243,9 @@ class TestTavernInvariants:
         
         # Only test heroes without sufficient gold
         assume(not hero.can_afford_beer())
+        
+        # Exclude heroes with only 1 life (they will die from life drain)
+        assume(hero.life > 1)
         
         # Store original state
         original_pos = hero.pos

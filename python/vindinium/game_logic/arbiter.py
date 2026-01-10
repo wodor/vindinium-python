@@ -27,11 +27,14 @@ class Arbiter:
         # Resolve combat after movement
         game = Arbiter.resolve_combat(game, hero_id)
         
-        # Handle respawns
+        # Handle respawns (after combat)
         game = Arbiter.handle_respawns(game)
         
         # Finalize turn effects
         game = Arbiter.finalize_turn(game, hero_id)
+        
+        # Handle respawns again (in case life drain caused death)
+        game = Arbiter.handle_respawns(game)
         
         return game
 

@@ -88,3 +88,18 @@ class Tile:
 
     def __str__(self) -> str:
         return self.render()
+    
+    def to_dict(self) -> dict:
+        """Convert tile to dictionary for serialization."""
+        return {
+            "tile_type": self.tile_type.value,
+            "owner": self.owner,
+        }
+    
+    @classmethod
+    def from_dict(cls, data: dict) -> "Tile":
+        """Create tile from dictionary."""
+        return cls(
+            tile_type=TileType(data["tile_type"]),
+            owner=data["owner"],
+        )
