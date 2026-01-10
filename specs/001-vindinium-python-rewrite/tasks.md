@@ -32,9 +32,9 @@ description: "Task list for Vindinium Python Rewrite"
 
 ### Tests for US1 (Property-Based)
 
-- [ ] T005 [P] [US1] Create property test for Position navigation/bounds in `python/tests/unit/test_models.py`
-- [ ] T006 [P] [US1] Create property test for Map Parsing round-trip in `python/tests/unit/test_map_parser.py`
-- [ ] T007 [P] [US1] Create property test for Game initialization invariants in `python/tests/unit/test_game_state.py`
+- [x] T005 [P] [US1] Create property test for Position navigation/bounds in `python/tests/unit/test_models.py`
+- [x] T006 [P] [US1] Create property test for Map Parsing round-trip in `python/tests/unit/test_map_parser.py`
+- [x] T007 [P] [US1] Create property test for Game initialization invariants in `python/tests/unit/test_game_state.py`
 
 ### Implementation for US1
 
@@ -53,9 +53,9 @@ description: "Task list for Vindinium Python Rewrite"
 ### Tests for US2 (Property-Based) ⚠️ CRITICAL
 
 - [x] T014 [P] [US2] Property test: Movement invariants (walls, bounds) in `python/tests/unit/test_arbiter_properties.py`
-- [ ] T015 [P] [US2] Property test: Combat invariants (damage, respawn) in `python/tests/unit/test_arbiter_combat.py`
-- [ ] T016 [P] [US2] Property test: Economy invariants (mining, income) in `python/tests/unit/test_arbiter_economy.py`
-- [ ] T017 [P] [US2] Property test: Tavern invariants (healing limits, gold cost) in `python/tests/unit/test_arbiter_tavern.py`
+- [x] T015 [P] [US2] Property test: Combat invariants (damage, respawn) in `python/tests/unit/test_arbiter_combat.py`
+- [x] T016 [P] [US2] Property test: Economy invariants (mining, income) in `python/tests/unit/test_arbiter_economy.py`
+- [x] T017 [P] [US2] Property test: Tavern invariants (healing limits, gold cost) in `python/tests/unit/test_arbiter_tavern.py`
 
 ### Implementation for US2
 

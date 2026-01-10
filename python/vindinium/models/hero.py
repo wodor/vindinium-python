@@ -141,3 +141,39 @@ class Hero:
 
     def __str__(self) -> str:
         return f"Hero[{self.id}]({self.name}): life={self.life}, gold={self.gold}, pos={self.pos}"
+    
+    def to_dict(self) -> dict:
+        """Convert hero to dictionary for serialization."""
+        return {
+            "id": self.id,
+            "token": self.token,
+            "name": self.name,
+            "user_id": self.user_id,
+            "elo": self.elo,
+            "pos": {"x": self.pos.x, "y": self.pos.y},
+            "last_dir": self.last_dir.value if self.last_dir else None,
+            "life": self.life,
+            "gold": self.gold,
+            "timed_out": self.timed_out,
+            "last_respawn": self.last_respawn,
+        }
+    
+    @classmethod
+    def from_dict(cls, data: dict) -> "Hero":
+        """Create hero from dictionary."""
+        from .pos import Pos
+        from .pos import Dir
+        
+        return cls(
+            id=data["id"],
+            token=data["token"],
+            name=data["name"],
+            user_id=data["user_id"],
+            elo=data["elo"],
+            pos=Pos(data["pos"]["x"], data["pos"]["y"]),
+            last_dir=Dir(data["last_dir"]) if data["last_dir"] else None,
+            life=data["life"],
+            gold=data["gold"],
+            timed_out=data["timed_out"],
+            last_respawn=data["last_respawn"],
+        )

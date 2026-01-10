@@ -185,3 +185,40 @@ class Game:
 
     def __str__(self) -> str:
         return f"Game[{self.id}]: {self.status}, turn {self.turn}/{self.max_turns}"
+    
+    def to_dict(self) -> dict:
+        """Convert game to dictionary for serialization."""
+        return {
+            "id": self.id,
+            "training": self.training,
+            "board": self.board.to_dict(),
+            "hero1": self.hero1.to_dict(),
+            "hero2": self.hero2.to_dict(),
+            "hero3": self.hero3.to_dict(),
+            "hero4": self.hero4.to_dict(),
+            "spawn_pos": {"x": self.spawn_pos.x, "y": self.spawn_pos.y},
+            "turn": self.turn,
+            "max_turns": self.max_turns,
+            "status": self.status.value,
+        }
+    
+    @classmethod
+    def from_dict(cls, data: dict) -> "Game":
+        """Create game from dictionary."""
+        from .hero import Hero
+        from .board import Board
+        from .pos import Pos
+        
+        return cls(
+            id=data["id"],
+            training=data["training"],
+            board=Board.from_dict(data["board"]),
+            hero1=Hero.from_dict(data["hero1"]),
+            hero2=Hero.from_dict(data["hero2"]),
+            hero3=Hero.from_dict(data["hero3"]),
+            hero4=Hero.from_dict(data["hero4"]),
+            spawn_pos=Pos(data["spawn_pos"]["x"], data["spawn_pos"]["y"]),
+            turn=data["turn"],
+            max_turns=data["max_turns"],
+            status=Status(data["status"]),
+        )
