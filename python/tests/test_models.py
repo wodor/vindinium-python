@@ -1,6 +1,7 @@
 """Tests for core models."""
 
 import pytest
+from hypothesis import given, strategies as st
 from vindinium.models import Pos, Dir, Tile, Hero, Board, Game, Status
 
 
@@ -46,6 +47,186 @@ class TestPos:
         assert pos1.distance_to(pos3) == 5  # |5-7| + |5-8| = 2 + 3 = 5
         assert pos1.is_adjacent_to(pos2)
         assert not pos1.is_adjacent_to(pos3)
+
+
+class TestPosProperties:
+    """Property-based tests for Position model."""
+
+    @given(x=st.integers(), y=st.integers())
+    def test_property_movement_north(self, x, y):
+        """
+        Property: Moving north decreases x coordinate by 1.
+        Validates: Requirement 1.6 - North movement (x-1)
+        """
+        pos = Pos(x, y)
+        moved = pos.move_to(Dir.NORTH)
+        assert moved == Pos(x - 1, y)
+        assert moved.x == pos.x - 1
+        assert moved.y == pos.y
+
+    @given(x=st.integers(), y=st.integers())
+    def test_property_movement_south(self, x, y):
+        """
+        Property: Moving south increases x coordinate by 1.
+        Validates: Requirement 1.7 - South movement (x+1)
+        """
+        pos = Pos(x, y)
+        moved = pos.move_to(Dir.SOUTH)
+        assert moved == Pos(x + 1, y)
+        assert moved.x == pos.x + 1
+        assert moved.y == pos.y
+
+    @given(x=st.integers(), y=st.integers())
+    def test_property_movement_east(self, x, y):
+        """
+        Property: Moving east increases y coordinate by 1.
+        Validates: Requirement 1.8 - East movement (y+1)
+        """
+        pos = Pos(x, y)
+        moved = pos.move_to(Dir.EAST)
+        assert moved == Pos(x, y + 1)
+        assert moved.x == pos.x
+        assert moved.y == pos.y + 1
+
+    @given(x=st.integers(), y=st.integers())
+    def test_property_movement_west(self, x, y):
+        """
+        Property: Moving west decreases y coordinate by 1.
+        Validates: Requirement 1.9 - West movement (y-1)
+        """
+        pos = Pos(x, y)
+        moved = pos.move_to(Dir.WEST)
+        assert moved == Pos(x, y - 1)
+        assert moved.x == pos.x
+        assert moved.y == pos.y - 1
+
+    @given(x=st.integers(), y=st.integers())
+    def test_property_movement_stay(self, x, y):
+        """
+        Property: STAY direction keeps position unchanged.
+        Validates: Requirement 1.1 - Navigation support
+        """
+        pos = Pos(x, y)
+        moved = pos.move_to(Dir.STAY)
+        assert moved == pos
+        assert moved.x == x
+        assert moved.y == y
+
+    @given(x=st.integers(), y=st.integers())
+    def test_property_navigation_reversibility_north_south(self, x, y):
+        """
+        Property: Moving North then South returns to original position.
+        Validates: Navigation invariant - reversibility
+        """
+        pos = Pos(x, y)
+        moved = pos.move_to(Dir.NORTH).move_to(Dir.SOUTH)
+        assert moved == pos
+
+    @given(x=st.integers(), y=st.integers())
+    def test_property_navigation_reversibility_south_north(self, x, y):
+        """
+        Property: Moving South then North returns to original position.
+        Validates: Navigation invariant - reversibility
+        """
+        pos = Pos(x, y)
+        moved = pos.move_to(Dir.SOUTH).move_to(Dir.NORTH)
+        assert moved == pos
+
+    @given(x=st.integers(), y=st.integers())
+    def test_property_navigation_reversibility_east_west(self, x, y):
+        """
+        Property: Moving East then West returns to original position.
+        Validates: Navigation invariant - reversibility
+        """
+        pos = Pos(x, y)
+        moved = pos.move_to(Dir.EAST).move_to(Dir.WEST)
+        assert moved == pos
+
+    @given(x=st.integers(), y=st.integers())
+    def test_property_navigation_reversibility_west_east(self, x, y):
+        """
+        Property: Moving West then East returns to original position.
+        Validates: Navigation invariant - reversibility
+        """
+        pos = Pos(x, y)
+        moved = pos.move_to(Dir.WEST).move_to(Dir.EAST)
+        assert moved == pos
+
+    @given(x=st.integers(min_value=-1000, max_value=-1), size=st.integers(min_value=1, max_value=100))
+    def test_property_is_in_negative_x(self, x, size):
+        """
+        Property: Position with negative x is always out of bounds.
+        Validates: Boundary checking - negative coordinates
+        """
+        pos = Pos(x, 0)
+        assert not pos.is_in(size)
+
+    @given(y=st.integers(min_value=-1000, max_value=-1), size=st.integers(min_value=1, max_value=100))
+    def test_property_is_in_negative_y(self, y, size):
+        """
+        Property: Position with negative y is always out of bounds.
+        Validates: Boundary checking - negative coordinates
+        """
+        pos = Pos(0, y)
+        assert not pos.is_in(size)
+
+    @given(size=st.integers(min_value=1, max_value=100))
+    def test_property_is_in_exceeds_x(self, size):
+        """
+        Property: Position with x >= size is out of bounds.
+        Validates: Boundary checking - upper bound x
+        """
+        pos = Pos(size, 0)
+        assert not pos.is_in(size)
+        pos_over = Pos(size + 1, 0)
+        assert not pos_over.is_in(size)
+
+    @given(size=st.integers(min_value=1, max_value=100))
+    def test_property_is_in_exceeds_y(self, size):
+        """
+        Property: Position with y >= size is out of bounds.
+        Validates: Boundary checking - upper bound y
+        """
+        pos = Pos(0, size)
+        assert not pos.is_in(size)
+        pos_over = Pos(0, size + 1)
+        assert not pos_over.is_in(size)
+
+    @given(
+        x=st.integers(min_value=0, max_value=99),
+        y=st.integers(min_value=0, max_value=99),
+        size=st.integers(min_value=1, max_value=100)
+    )
+    def test_property_is_in_valid_bounds(self, x, y, size):
+        """
+        Property: Position with 0 <= x,y < size is within bounds.
+        Validates: Boundary checking - valid coordinates
+        """
+        if x < size and y < size:
+            pos = Pos(x, y)
+            assert pos.is_in(size)
+
+    @given(x=st.integers(), y=st.integers())
+    def test_property_immutability(self, x, y):
+        """
+        Property: Moving a position creates a new instance (immutability).
+        Validates: Constitutional requirement - immutability
+        """
+        pos = Pos(x, y)
+        moved_north = pos.move_to(Dir.NORTH)
+        moved_south = pos.move_to(Dir.SOUTH)
+        moved_east = pos.move_to(Dir.EAST)
+        moved_west = pos.move_to(Dir.WEST)
+        
+        # Original position unchanged
+        assert pos.x == x
+        assert pos.y == y
+        
+        # Each move creates a new instance
+        assert pos is not moved_north
+        assert pos is not moved_south
+        assert pos is not moved_east
+        assert pos is not moved_west
 
 
 class TestTile:
