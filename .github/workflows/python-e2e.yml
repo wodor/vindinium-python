@@ -1,0 +1,71 @@
+name: Python E2E Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'python/**'
+      - '.github/workflows/python-e2e.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'python/**'
+      - '.github/workflows/python-e2e.yml'
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      
+      - name: Cache pip packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('python/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      
+      - name: Install dependencies
+        run: |
+          cd python
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Verify Docker is available
+        run: |
+          docker --version
+          docker compose version
+      
+      - name: Run E2E tests
+        run: |
+          cd python
+          python run_e2e_tests.py -v
+        timeout-minutes: 10
+      
+      - name: Cleanup containers on failure
+        if: failure()
+        run: |
+          cd python
+          docker compose -f docker-compose.test.yml down -v || true
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: e2e-test-results-${{ matrix.python-version }}
+          path: |
+            python/.pytest_cache/
+            python/test-results/
+          retention-days: 7
