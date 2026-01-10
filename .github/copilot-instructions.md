@@ -220,6 +220,140 @@ When working on tasks, look for these labels:
 3. **Data model questions**: See `/specs/001-vindinium-python-rewrite/data-model.md`
 4. **Setup issues**: See `/specs/001-vindinium-python-rewrite/quickstart.md`
 
+## Custom Agents
+
+This repository includes specialized custom agents for specific tasks:
+
+### Available Agents
+- **speckit-specify**: Create or update feature specifications
+- **speckit-plan**: Execute implementation planning workflow
+- **speckit-tasks**: Generate actionable, dependency-ordered tasks
+- **speckit-implement**: Execute implementation plan from tasks.md
+- **speckit-clarify**: Identify underspecified areas and ask clarification questions
+- **speckit-analyze**: Cross-artifact consistency and quality analysis
+- **speckit-constitution**: Create or update project constitution
+- **speckit-taskstoissues**: Convert tasks to GitHub issues
+- **speckit-checklist**: Generate custom checklists for features
+
+### When to Use Custom Agents
+- Delegate to custom agents when their expertise matches your task
+- Custom agents have specialized knowledge and are more reliable for their domain
+- Review their output but trust their specialized implementation
+- See `.github/agents/` directory for agent definitions
+
+## Security Guidelines
+
+**CRITICAL - Always Follow These Rules:**
+
+- ❌ **NEVER commit secrets, API keys, or credentials** to the repository
+- ✅ Use environment variables for sensitive configuration
+- ✅ Use `.env` files (and add to `.gitignore`) for local secrets
+- ✅ Review all code changes for potential security vulnerabilities
+- ✅ Validate all user input in API endpoints
+- ✅ Use parameterized queries to prevent injection attacks
+- ✅ Follow OWASP security guidelines for web applications
+- ✅ Run security scanning tools before finalizing changes
+
+### MongoDB Security
+- Use connection strings from environment variables
+- Never hardcode database credentials
+- Use MongoDB authentication in production
+
+### API Security
+- Validate all request bodies with Pydantic
+- Implement rate limiting for public endpoints
+- Use HTTPS in production
+- Sanitize error messages (don't leak internal details)
+
+## Environment Setup
+
+### Required Tools
+```bash
+# Python 3.11 or higher
+python --version  # Should be 3.11+
+
+# Install development dependencies
+cd python
+pip install -e ".[dev]"
+
+# Verify installations
+pytest --version
+ruff --version
+mypy --version
+```
+
+### Running the Full Validation Suite
+```bash
+# From repository root
+cd python
+
+# 1. Run all tests with coverage
+pytest tests/ -v --cov=vindinium --cov-report=term-missing
+
+# 2. Run linter
+ruff check .
+
+# 3. Run type checker
+mypy vindinium --strict
+
+# 4. Run all three together (pre-commit check)
+pytest tests/ -v && ruff check . && mypy vindinium --strict
+```
+
+### Local Development
+```bash
+# Run FastAPI development server (when implemented)
+uvicorn vindinium.main:app --reload --port 8000
+
+# Run MongoDB locally (for integration tests)
+docker run -d -p 27017:27017 --name vindinium-mongo mongo:latest
+
+# Set environment variables
+export MONGODB_URI="mongodb://localhost:27017"
+export MONGODB_DB="vindinium_dev"
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**Issue**: Tests fail with `ModuleNotFoundError`
+**Solution**: Install the package in development mode: `pip install -e ".[dev]"`
+
+**Issue**: Type checking fails with mypy
+**Solution**: Ensure all functions have type hints, including return types
+
+**Issue**: Hypothesis tests are flaky
+**Solution**: Check for hidden state mutation. All models must be frozen dataclasses.
+
+**Issue**: Can't import from vindinium package
+**Solution**: Make sure you're in the `/python` directory when running commands
+
+**Issue**: MongoDB connection errors in tests
+**Solution**: Integration tests may require a running MongoDB instance. Unit tests should not.
+
+### Getting Help
+
+If stuck:
+1. Check the relevant spec file in `/specs/001-vindinium-python-rewrite/`
+2. Review similar existing code for patterns
+3. Look at the `COPILOT_WORKFLOW.md` for step-by-step guidance
+4. Check if a custom agent can help with your specific task
+
+## Repository Structure Note
+
+⚠️ **This repository contains both legacy Scala code and new Python implementation:**
+
+- **Legacy (Scala/Play Framework)**: Root directory, `app/`, `conf/`, `build.sbt`
+  - DO NOT modify unless explicitly instructed
+  - This is the original server implementation (maintenance mode)
+
+- **Active (Python 3.11+)**: `python/` directory
+  - ALL new development happens here
+  - This is the rewrite in progress
+
+When working on tasks, **always work in the `python/` directory** unless the issue specifically mentions the Scala codebase.
+
 ## Remember
 
 - ✅ Tests before implementation
@@ -227,6 +361,9 @@ When working on tasks, look for these labels:
 - ✅ Pure functions in Arbiter
 - ✅ Type hints everywhere
 - ✅ Verify invariants with Hypothesis
+- ✅ Never commit secrets or credentials
+- ✅ Work in `python/` directory for all new code
 - ❌ No mutation of game state
 - ❌ No I/O in game logic
 - ❌ No skipping property tests
+- ❌ No modifying Scala code without permission
