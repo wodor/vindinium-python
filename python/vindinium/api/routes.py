@@ -11,6 +11,7 @@ from vindinium.system.generator import Generator
 from vindinium.system.map_parser import MapParser
 from vindinium.game_logic.arbiter import Arbiter
 from vindinium.db.repositories import GameRepository, get_game_repository
+from vindinium.api.serializers import serialize_game_for_hero, serialize_game
 
 
 router = APIRouter(prefix="/api", tags=["game"])
@@ -80,14 +81,8 @@ async def create_training_game(
     # Get hero 1 (the player in training mode)
     hero = game.hero1
     
-    # Build response
-    response_data = {
-        "game": game.to_dict(),
-        "hero": hero.to_dict(),
-        "token": hero.token,
-        "viewUrl": f"/game/{game_id}",
-        "playUrl": f"/api/{game_id}/{hero.token}",
-    }
+    # Build response using serializer
+    response_data = serialize_game_for_hero(game, hero)
     
     return JSONResponse(content=response_data)
 
@@ -144,15 +139,12 @@ async def process_move(
     # Save updated game state
     await repo.save(game)
     
-    # Build response
+    # Build response using serializer
     updated_hero = game.get_hero(hero.id)
-    response_data = {
-        "game": game.to_dict(),
-        "hero": updated_hero.to_dict() if updated_hero else hero.to_dict(),
-        "token": token,
-        "viewUrl": f"/game/{game_id}",
-        "playUrl": f"/api/{game_id}/{token}",
-    }
+    if updated_hero:
+        response_data = serialize_game_for_hero(game, updated_hero)
+    else:
+        response_data = serialize_game_for_hero(game, hero)
     
     return JSONResponse(content=response_data)
 
@@ -175,4 +167,4 @@ async def get_game_state(
     if game is None:
         raise HTTPException(status_code=404, detail="Game not found")
     
-    return JSONResponse(content={"game": game.to_dict()})
+    return JSONResponse(content={"game": serialize_game(game)})

@@ -93,6 +93,26 @@ class GameRepository:
             games.append(Game.from_dict(game_dict))
         
         return games
+    
+    async def get_active_games(self, limit: int = 10) -> list[Game]:
+        """Get active (non-finished) games, sorted by most recent turn.
+        
+        Args:
+            limit: Maximum number of games to return (default 10)
+            
+        Returns:
+            List of active Game instances
+        """
+        cursor = self.collection.find(
+            {"status": {"$in": ["Created", "Started"]}}
+        ).sort("turn", -1).limit(limit)
+        
+        games = []
+        async for game_dict in cursor:
+            game_dict.pop("_id", None)
+            games.append(Game.from_dict(game_dict))
+        
+        return games
 
 
 async def get_game_repository() -> GameRepository:
