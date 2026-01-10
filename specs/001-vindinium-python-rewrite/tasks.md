@@ -86,22 +86,63 @@ description: "Task list for Vindinium Python Rewrite"
 - [x] T031 [US3] Implement `GET /api/game/{gameId}` endpoint in `python/vindinium/api/routes.py`
 - [x] T032 [US3] Add Error Handling & Logging middleware in `python/vindinium/api/middleware.py`
 
-## Phase 5: Polish & Integration
+## Phase 5: User Story 4 - Legacy Client Integration (Priority: P2)
 
-- [ ] T033 Verify all Hypothesis tests pass with high example count
-- [ ] T034 Run full game simulation integration test
-- [ ] T035 Update `python/README.md` with usage instructions
-- [ ] T036 Dockerize application (Dockerfile & docker-compose.yml)
+**Goal**: Enable the existing JavaScript client to connect to the Python server for visualization and validation.
+**Independent Test**: Client can display a game board, stream game states via SSE, and submit moves through the API.
+
+**User Story**: As a developer, I want to use the legacy JavaScript client as a validation tool, so that I can visually verify all game mechanics work correctly.
+
+### Acceptance Criteria
+
+1. Client can connect to Python server on port 9000
+2. Server streams game states via Server-Sent Events (SSE)
+3. Client displays game board with heroes, mines, taverns
+4. Client can submit moves and see state updates in real-time
+5. Static assets (bundle.js, bundle.css) are served correctly
+6. HTML game viewer page is served for any game ID
+
+### Implementation for US4
+
+- [ ] T037 [US4] Add `sse-starlette==1.8.2` to `python/requirements.txt`
+- [ ] T038 [P] [US4] Create `python/vindinium/api/__init__.py` API module structure
+- [ ] T039 [P] [US4] Implement SSE game state generator in `python/vindinium/api/sse_utils.py`
+- [ ] T040 [US4] Implement `GET /events/{game_id}` SSE endpoint in `python/vindinium/api/game_routes.py`
+- [ ] T041 [P] [US4] Mount static file serving for `/assets` in `python/main.py`
+- [ ] T042 [US4] Implement `GET /{game_id}` HTML game viewer in `python/vindinium/api/game_routes.py`
+- [ ] T043 [P] [US4] Create game state serializer matching client JSON schema in `python/vindinium/api/serializers.py`
+- [ ] T044 [US4] Implement `GET /now-playing` SSE endpoint for active games in `python/vindinium/api/game_routes.py`
+- [ ] T045 [US4] Implement `GET /tv` TV mode viewer page in `python/vindinium/api/game_routes.py`
+- [ ] T046 [US4] Update training/move endpoints to trigger SSE events in `python/vindinium/api/routes.py`
+
+### Client Validation Extension
+
+- [ ] T047 [P] [US4] Create `client/src/validation/Assertions.js` test assertion module
+- [ ] T048 [P] [US4] Create `client/src/validation/TestRunner.js` scenario runner
+- [ ] T049 [US4] Create test scenarios for 11 game mechanics in `client/src/validation/scenarios/`
+- [ ] T050 [US4] Implement validation report generator in `client/src/validation/Reporter.js`
+
+## Phase 6: Polish & Integration
+
+- [ ] T051 Verify all Hypothesis tests pass with high example count
+- [ ] T052 Run full game simulation integration test
+- [ ] T053 Test complete 4-hero game through legacy client (300 turns)
+- [ ] T054 Run client validation suite and verify all scenarios pass
+- [ ] T055 Update `python/README.md` with client integration instructions
+- [ ] T056 Dockerize application (Dockerfile & docker-compose.yml)
 
 ## Dependencies
 
 - **Setup**: Blocking
 - **US1 (Core)**: Blocks US2 and US3
 - **US2 (Arbiter)**: Blocks US3 (API needs engine to work)
-- **US3 (API)**: Final user-facing layer
+- **US3 (API)**: Blocks US4 (Client needs API endpoints)
+- **US4 (Client)**: Final validation layer
 
 ## Parallel Execution
 
 - **Models**: T008-T012 can be built in parallel.
 - **Tests**: All property tests (T014-T017) can be written in parallel before logic.
 - **API**: Endpoints (T029-T031) can be scaffolded in parallel.
+- **US4 Setup**: T037-T039, T041, T043 can be done in parallel.
+- **Client Validation**: T047-T048, T050 can be developed in parallel.
