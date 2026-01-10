@@ -1,0 +1,4 @@
+# file: /home/runner/work/vindinium-python/vindinium-python/python/vindinium/models/pos.py
+# hypothesis_version: 6.150.0
+
+['Crash', 'Dir', 'East', 'North', 'Pos', 'South', 'Stay', 'West', 'east', 'north', 'south', 'stay', 'west']
