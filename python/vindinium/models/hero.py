@@ -90,11 +90,8 @@ class Hero:
         return self.with_life(self.MINE_LIFE)
 
     def day(self) -> "Hero":
-        """Apply daily life drain: -1 life (respawn if dead)."""
-        hero = self.with_life(self.DAY_LIFE)
-        if hero.is_dead():
-            return hero.with_life(1)
-        return hero
+        """Apply daily life drain: -1 life."""
+        return self.with_life(self.DAY_LIFE)
 
     def respawn(self, pos: Pos, turn: int) -> "Hero":
         """Respawn at position with full life."""

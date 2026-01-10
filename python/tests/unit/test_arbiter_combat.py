@@ -295,11 +295,19 @@ class TestCombatInvariants:
         assert updated_defender is not None
         
         # Defender should have taken combat damage
-        # (either died and respawned, or took 20+1 damage)
-        if original_defender_life > 20:
+        # Combat damage is 20, life drain is 1, total 21
+        # If hero dies from combat (life <= 20), they respawn with 100 and then take -1 drain = 99
+        # If hero dies from life drain (life == 21), they respawn with 100 and no more drain
+        # If hero survives (life > 21), they take 21 damage total
+        if original_defender_life > 21:
+            # Survived: took 20 combat damage + 1 life drain
             assert updated_defender.life == original_defender_life - 21
+        elif original_defender_life == 21:
+            # Died from life drain after combat: respawned with full health, no more drain
+            assert updated_defender.life == 100
+            assert updated_defender.pos == game.spawn_pos_of(defender)
         else:
-            # Died and respawned
+            # Died from combat: respawned with 100, then took -1 life drain = 99
             assert updated_defender.life == 99
             assert updated_defender.pos == game.spawn_pos_of(defender)
 
