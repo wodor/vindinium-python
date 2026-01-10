@@ -36,7 +36,13 @@ Start the development server with auto-reload:
 ```bash
 uvicorn main:app --reload
 ```
-The API will be available at `http://localhost:8000`.
+The API will be available at `http://localhost:9000`.
+
+**For manual testing with client integration:** See [python/MANUAL_TESTING.md](../../python/MANUAL_TESTING.md) for detailed instructions on:
+- Running server with proper process management
+- Building the JavaScript client
+- Testing SSE streaming and game viewer
+- Debugging common issues
 
 ## Running Tests
 

@@ -89,6 +89,8 @@ python main.py
 # Visit: http://localhost:9000
 ```
 
+**For manual testing with client integration:** See [MANUAL_TESTING.md](MANUAL_TESTING.md) for the complete guide on running the server with proper process management, building the client, and debugging common issues.
+
 ## 📖 Key Files to Reference
 
 When implementing next phases, reference these Scala files:
