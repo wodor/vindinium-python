@@ -8,7 +8,6 @@ from typing import Callable
 from fastapi import Request, status
 from fastapi.exceptions import HTTPException, RequestValidationError
 from fastapi.responses import JSONResponse
-from pydantic import ValidationError
 from starlette.middleware.base import BaseHTTPMiddleware
 
 
@@ -103,7 +102,8 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
     """Middleware for detailed request logging.
     
     Logs request details including headers, client info, and request body
-    for debugging purposes. This runs before ErrorHandlingMiddleware.
+    for debugging purposes. Due to middleware execution order, this runs
+    after ErrorHandlingMiddleware, so request_id is available.
     """
     
     async def dispatch(self, request: Request, call_next: Callable):
@@ -116,7 +116,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         Returns:
             Response from the next handler
         """
-        # Get request ID if available (set by ErrorHandlingMiddleware)
+        # Get request ID (set by ErrorHandlingMiddleware which runs first)
         request_id = getattr(request.state, 'request_id', 'unknown')
         
         # Log incoming request details at DEBUG level
