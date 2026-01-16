@@ -2,8 +2,13 @@
 
 import logging
 import time
+import uuid
+from typing import Callable
+
 from fastapi import Request, status
+from fastapi.exceptions import HTTPException, RequestValidationError
 from fastapi.responses import JSONResponse
+from pydantic import ValidationError
 from starlette.middleware.base import BaseHTTPMiddleware
 
 
@@ -16,53 +21,134 @@ logger = logging.getLogger("vindinium")
 
 
 class ErrorHandlingMiddleware(BaseHTTPMiddleware):
-    """Middleware for centralized error handling."""
+    """Middleware for centralized error handling.
     
-    async def dispatch(self, request: Request, call_next):
-        """Handle requests and catch exceptions."""
+    This middleware catches unhandled exceptions and converts them to
+    appropriate JSON error responses. It also logs all errors with
+    context information.
+    
+    Note: HTTPException and RequestValidationError are handled by FastAPI's
+    built-in exception handlers, so we don't intercept them here.
+    """
+    
+    async def dispatch(self, request: Request, call_next: Callable):
+        """Handle requests and catch exceptions.
+        
+        Args:
+            request: The incoming HTTP request
+            call_next: The next middleware/handler in the chain
+            
+        Returns:
+            Response object (success or error)
+        """
+        # Generate unique request ID for tracking
+        request_id = str(uuid.uuid4())
+        request.state.request_id = request_id
+        
         start_time = time.time()
         
         try:
             response = await call_next(request)
             
-            # Log request
+            # Log successful request
             process_time = time.time() - start_time
             logger.info(
-                f"{request.method} {request.url.path} "
+                f"[{request_id}] {request.method} {request.url.path} "
                 f"- {response.status_code} - {process_time:.3f}s"
             )
             
+            # Add request ID to response headers for debugging
+            response.headers["X-Request-ID"] = request_id
+            
             return response
             
+        except HTTPException:
+            # Re-raise HTTPException to let FastAPI handle it
+            # (FastAPI has built-in handlers for proper status codes)
+            raise
+            
+        except RequestValidationError:
+            # Re-raise validation errors to let FastAPI handle them
+            raise
+            
         except Exception as exc:
-            # Log error
+            # Log unexpected errors with full stack trace
             process_time = time.time() - start_time
             logger.error(
-                f"{request.method} {request.url.path} "
-                f"- ERROR: {str(exc)} - {process_time:.3f}s",
-                exc_info=True
+                f"[{request_id}] {request.method} {request.url.path} "
+                f"- ERROR: {type(exc).__name__}: {str(exc)} "
+                f"- {process_time:.3f}s",
+                exc_info=True,
+                extra={
+                    "request_id": request_id,
+                    "method": request.method,
+                    "path": request.url.path,
+                    "process_time": process_time,
+                }
             )
             
-            # Return error response
+            # Return generic error response (don't leak internal details)
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content={
                     "error": "Internal server error",
-                    "detail": str(exc) if logger.level == logging.DEBUG else "An error occurred"
-                }
+                    "detail": str(exc) if logger.level == logging.DEBUG else "An unexpected error occurred",
+                    "request_id": request_id,
+                },
+                headers={"X-Request-ID": request_id}
             )
 
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
-    """Middleware for logging all requests."""
+    """Middleware for detailed request logging.
     
-    async def dispatch(self, request: Request, call_next):
-        """Log request details."""
-        logger.debug(f"Incoming request: {request.method} {request.url}")
-        logger.debug(f"Headers: {dict(request.headers)}")
+    Logs request details including headers, client info, and request body
+    for debugging purposes. This runs before ErrorHandlingMiddleware.
+    """
+    
+    async def dispatch(self, request: Request, call_next: Callable):
+        """Log detailed request information.
         
+        Args:
+            request: The incoming HTTP request
+            call_next: The next middleware/handler in the chain
+            
+        Returns:
+            Response from the next handler
+        """
+        # Get request ID if available (set by ErrorHandlingMiddleware)
+        request_id = getattr(request.state, 'request_id', 'unknown')
+        
+        # Log incoming request details at DEBUG level
+        logger.debug(
+            f"[{request_id}] Incoming request: {request.method} {request.url}",
+            extra={
+                "request_id": request_id,
+                "method": request.method,
+                "url": str(request.url),
+                "client": request.client.host if request.client else "unknown",
+                "user_agent": request.headers.get("user-agent", "unknown"),
+            }
+        )
+        
+        # Log headers (excluding sensitive ones)
+        if logger.level <= logging.DEBUG:
+            safe_headers = {
+                k: v for k, v in request.headers.items()
+                if k.lower() not in ["authorization", "cookie", "x-api-key"]
+            }
+            logger.debug(f"[{request_id}] Headers: {safe_headers}")
+        
+        # Process request through the rest of the middleware chain
         response = await call_next(request)
         
-        logger.debug(f"Response status: {response.status_code}")
+        # Log response status
+        logger.debug(
+            f"[{request_id}] Response status: {response.status_code}",
+            extra={
+                "request_id": request_id,
+                "status_code": response.status_code,
+            }
+        )
         
         return response

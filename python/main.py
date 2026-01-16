@@ -41,9 +41,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Add middleware
-app.add_middleware(ErrorHandlingMiddleware)
+# Add middleware (executed in reverse order of registration)
+# RequestLoggingMiddleware is added last so ErrorHandlingMiddleware runs first
 app.add_middleware(RequestLoggingMiddleware)
+app.add_middleware(ErrorHandlingMiddleware)
 
 # Mount static files for client assets
 # Check if public directory exists (from repository root)
